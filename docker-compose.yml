@@ -1,0 +1,152 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: insurance-postgres
+    environment:
+      POSTGRES_DB: insurance_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - insurance-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d insurance_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  config-service:
+    build:
+      context: .
+      dockerfile: config-service/Dockerfile
+    container_name: config-service
+    hostname: config-service
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: git
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
+    networks:
+      - insurance-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    hostname: discovery-service
+    environment:
+      - EUREKA_INSTANCE_HOSTNAME=discovery-service
+      - HOSTNAME=discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - insurance-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      config-service:
+        condition: service_healthy
+
+  member-service:
+    build:
+      context: .
+      dockerfile: member-service/Dockerfile
+    container_name: member-service
+    hostname: member-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: member-service
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+  policy-service:
+    build:
+      context: .
+      dockerfile: policy-service/Dockerfile
+    container_name: policy-service
+    hostname: policy-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: policy-service
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+  claim-service:
+    build:
+      context: .
+      dockerfile: claim-service/Dockerfile
+    container_name: claim-service
+    hostname: claim-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: claim-service
+      CLOUDINARY_CLOUD_NAME: dhjchmzhh
+      CLOUDINARY_API_KEY: 859857184779895
+      CLOUDINARY_API_SECRET: ReClX9oJvvvIrTFyZPNMQc27Azs
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    hostname: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: api-gateway
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+networks:
+  insurance-network:
+    driver: bridge
