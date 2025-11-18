@@ -18,6 +18,37 @@ services:
       timeout: 5s
       retries: 5
 
+      # Servidor Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak-server
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/insurance_db
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin123
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      # Para desarrollo local
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "5050:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
   config-service:
     build:
       context: .
@@ -37,6 +68,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+    depends_on:
+      keycloak:
+        condition: service_healthy
 
 
   discovery-service:
@@ -119,9 +153,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: admin123
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       HOSTNAME: claim-service
-      CLOUDINARY_CLOUD_NAME: dhjchmzhh
-      CLOUDINARY_API_KEY: 859857184779895
-      CLOUDINARY_API_SECRET: ReClX9oJvvvIrTFyZPNMQc27Azs
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     depends_on:
       discovery-service:
         condition: service_healthy

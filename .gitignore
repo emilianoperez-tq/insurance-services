@@ -38,5 +38,6 @@ build/
 .DS_Store
 
 ### Docker Volumes ###
+.env
 postgres_data
 .idea
