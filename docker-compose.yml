@@ -18,7 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-      # Servidor Keycloak
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: keycloak-server
@@ -43,7 +42,7 @@ services:
     networks:
       - insurance-network
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -59,11 +58,10 @@ services:
       - "8888:8888"
     environment:
       SPRING_PROFILES_ACTIVE: git
-      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config-repo
     networks:
       - insurance-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,7 +69,6 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
-
 
   discovery-service:
     build:
@@ -87,7 +84,7 @@ services:
     networks:
       - insurance-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -153,6 +150,31 @@ services:
       SPRING_DATASOURCE_PASSWORD: admin123
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       HOSTNAME: claim-service
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - insurance-network
+
+  document-service:
+    build:
+      context: .
+      dockerfile: document-service/Dockerfile
+    container_name: document-service
+    hostname: document-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: document-service
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}

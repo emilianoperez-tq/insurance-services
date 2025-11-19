@@ -16,6 +16,7 @@
         <module>policy-service</module>
         <module>api-gateway</module>
         <module>config-service</module>
+        <module>document-service</module>
     </modules>
 
     <parent>
