@@ -48,6 +48,23 @@ services:
       retries: 10
       start_period: 90s
 
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    networks:
+      - insurance-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   config-service:
     build:
       context: .
@@ -68,6 +85,10 @@ services:
       start_period: 20s
     depends_on:
       keycloak:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   discovery-service:
@@ -91,6 +112,33 @@ services:
     depends_on:
       config-service:
         condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    hostname: notification-service
+    ports:
+      - "8085:8085"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      HOSTNAME: notification-service
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: admin123
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - insurance-network
 
   member-service:
     build:
@@ -153,6 +201,8 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: admin123
     depends_on:
       discovery-service:
         condition: service_healthy

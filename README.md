@@ -83,11 +83,17 @@ config-repo/
 
 ## Fase 4: Comunicación Asíncrona
 
-### notification-service
+### notification-service ✅
 **Propósito:** Escuchar eventos y actuar en consecuencia.
 
 RabbitMQ es el más fácil de implementar, pero en proyectos productivos se usa más Kafka.  
 La idea es crear eventos cuando se genera un reclamo o cambia de estado, notificando al usuario por correo o teléfono.
+
+**Resolución:**
+- Se creó el servicio notification-service que se encarga de escuchar los eventos de creación y actualización de reclamos
+- Se agregó la dependencia de Spring for RabbitMQ en el `pom.xml` del notification-service
+- Se configuró RabbitMQ en el `application.yml` del notification-service
+- Se creó un listener que escucha los eventos de creación y actualización de reclamos
 
 ---
 

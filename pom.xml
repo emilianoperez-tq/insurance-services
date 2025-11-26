@@ -17,6 +17,7 @@
         <module>api-gateway</module>
         <module>config-service</module>
         <module>document-service</module>
+        <module>notification-service</module>
     </modules>
 
     <parent>

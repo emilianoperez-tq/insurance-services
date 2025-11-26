@@ -2,7 +2,9 @@ package ar.com.smg.claim_service.controller;
 
 import ar.com.smg.claim_service.entity.Claim;
 import ar.com.smg.claim_service.repository.ClaimRepository;
+import ar.com.smg.claim_service.service.ClaimService;
 import ar.com.smg.claim_service.service.CloudinaryService;
+import ar.com.smg.claim_service.utils.ClaimStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -25,7 +27,7 @@ import java.util.Map;
 @RequestMapping("/api/claims")
 public class ClaimController {
 
-  private final ClaimRepository claimRepository;
+  private final ClaimService claimService;
   private final CloudinaryService cloudinaryService;
 
   @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -42,31 +44,31 @@ public class ClaimController {
       claim.setImageUrl(imageUrl); // asumimos que Claim tiene un campo imageUrl
     }
 
-    return claimRepository.save(claim);
+    return claimService.createClaim(claim);
   }
 
   @GetMapping()
   public List<Claim> getClaims() {
-    return claimRepository
-            .findAll()
-            .stream()
-            .filter((clam) -> {
-              return clam.getStatus().equals("PENDING");
-            })
-            .toList();
+    return claimService.getAllClaims();
   }
 
   @GetMapping("/{id}")
   public Claim getClaim(@PathVariable Long id) {
-    return claimRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Claim not found"));
+    return claimService.getClaimById(id);
   }
 
-  @PutMapping("/{id}/status")
-  public Claim updateStatus(@PathVariable Long id, @RequestBody String status) {
-    Claim claim = claimRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Claim not found"));
-    claim.setStatus(status);
-    return claimRepository.save(claim);
+  @PutMapping(value = "/{id}/status", consumes = {MediaType.APPLICATION_JSON_VALUE})
+  public Claim updateStatus(@PathVariable Long id, @RequestBody Object request) {
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, String> requestMap = mapper.convertValue(request, Map.class);
+    String status = requestMap.get("status");
+
+    System.out.println("Requested status update to: " + status);
+
+    if (!status.equals(ClaimStatus.APPROVED) && !status.equals(ClaimStatus.REJECTED)) {
+      throw new IllegalArgumentException("Status must be either APPROVED or REJECTED");
+    }
+
+    return claimService.updateClaimStatus(id, status);
   }
 }
