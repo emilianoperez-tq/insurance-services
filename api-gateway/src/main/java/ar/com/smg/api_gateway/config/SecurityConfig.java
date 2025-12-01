@@ -14,8 +14,9 @@ public class SecurityConfig {
   @Bean
   public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
     http
+            .csrf(csrf -> csrf.disable())
             .authorizeExchange(auth -> auth
-                    .pathMatchers("/public/**").permitAll()
+                    .pathMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/health").permitAll()
                     .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

@@ -81,9 +81,9 @@ config-repo/
 
 ---
 
-## Fase 4: Comunicación Asíncrona
+## Fase 4: Comunicación Asíncrona ✅
 
-### notification-service ✅
+### notification-service
 **Propósito:** Escuchar eventos y actuar en consecuencia.
 
 RabbitMQ es el más fácil de implementar, pero en proyectos productivos se usa más Kafka.  
@@ -113,7 +113,7 @@ La idea es crear eventos cuando se genera un reclamo o cambia de estado, notific
 
 ---
 
-## Fase 6: Trazabilidad Distribuida
+## Fase 6: Trazabilidad Distribuida ✅
 
 ### Zipkin Setup (Puerto: 9411)
 
@@ -122,6 +122,12 @@ La idea es crear eventos cuando se genera un reclamo o cambia de estado, notific
 - Configurar URL de Zipkin
 - Hacer una petición vía gateway → member-service → policy-service
 - Ver trazas en la interfaz de Zipkin
+
+**Resolución:**
+- Se creó un contenedor Docker para levantar Zipkin
+- Se agregó la dependencia de Spring Cloud Sleuth en el `pom.xml` de todos los servicios
+- Se configuró el `application.yml` de todos los servicios para que apunten al servidor de Zipkin
+- Se realizaron peticiones a través del API Gateway para verificar que las trazas se registraban correctamente en Zipkin
 
 ---
 
