@@ -15,10 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-  private final KeycloakAuthService keycloakAuthService;
+  private KeycloakAuthService keycloakAuthService;
+
+  public AuthController(KeycloakAuthService keycloakAuthService) {
+    this.keycloakAuthService = keycloakAuthService;
+  }
 
   @GetMapping("/health")
   public String healthCheck() {

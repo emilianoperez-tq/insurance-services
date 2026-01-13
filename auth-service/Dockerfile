@@ -4,6 +4,10 @@ WORKDIR /workspace
 # Copiar POM parent
 COPY pom.xml ./pom.xml
 
+# ⚠️ AGREGAR ESTO: Copiar módulo common
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+
 # Copiar módulo específico
 COPY auth-service/pom.xml ./auth-service/pom.xml
 COPY auth-service/src ./auth-service/src

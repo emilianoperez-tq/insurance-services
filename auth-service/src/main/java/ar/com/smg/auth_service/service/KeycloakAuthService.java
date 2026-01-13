@@ -1,6 +1,7 @@
 package ar.com.smg.auth_service.service;
 
 import ar.com.smg.auth_service.dto.TokenResponse;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 @Service
 public class KeycloakAuthService {
+
   @Value("${keycloak.server-url}")
   private String serverUrl;
 
@@ -22,7 +24,15 @@ public class KeycloakAuthService {
   @Value("${keycloak.client-secret}")
   private String clientSecret;
 
-  private final WebClient webClient;
+  private WebClient webClient;
+
+  @PostConstruct
+  public void logProperties() {
+    log.info("Keycloak configuration:");
+    log.info("server-url = {}", serverUrl);
+    log.info("client-id = {}", clientId);
+    log.info("client-secret = {}", clientSecret != null ? "***" : "null");
+  }
 
   public KeycloakAuthService(WebClient.Builder webClientBuilder) {
     this.webClient = webClientBuilder.build();
