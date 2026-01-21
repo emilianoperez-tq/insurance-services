@@ -20,6 +20,8 @@
         <module>document-service</module>
         <module>notification-service</module>
         <module>auth-service</module>
+        <module>audit-client</module>
+        <module>ia-starter</module>
     </modules>
 
     <parent>

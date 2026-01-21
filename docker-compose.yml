@@ -48,22 +48,22 @@ services:
       retries: 10
       start_period: 90s
 
-  rabbitmq:
-    image: rabbitmq:3.9-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
-    networks:
-      - insurance-network
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "status" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  rabbitmq:
+#    image: rabbitmq:3.9-management
+#    container_name: rabbitmq
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: admin
+#      RABBITMQ_DEFAULT_PASS: admin123
+#    networks:
+#      - insurance-network
+#    healthcheck:
+#      test: [ "CMD", "rabbitmq-diagnostics", "status" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
 
   zipkin:
     image: openzipkin/zipkin
@@ -133,8 +133,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
 
   discovery-service:
     build:
@@ -158,56 +158,56 @@ services:
       config-service:
         condition: service_healthy
 
-  notification-service:
-    build:
-      context: .
-      dockerfile: notification-service/Dockerfile
-    container_name: notification-service
-    hostname: notification-service
-    ports:
-      - "8085:8085"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      HOSTNAME: notification-service
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: admin
-      RABBITMQ_PASSWORD: admin123
-      MAIL_HOST: smtp.gmail.com
-      MAIL_PORT: 587
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - insurance-network
+  #  notification-service:
+  #    build:
+  #      context: .
+  #      dockerfile: notification-service/Dockerfile
+  #    container_name: notification-service
+  #    hostname: notification-service
+  #    ports:
+  #      - "8085:8085"
+  #    environment:
+  #      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+  #      HOSTNAME: notification-service
+  #      RABBITMQ_HOST: rabbitmq
+  #      RABBITMQ_PORT: 5672
+  #      RABBITMQ_USERNAME: admin
+  #      RABBITMQ_PASSWORD: admin123
+  #      MAIL_HOST: smtp.gmail.com
+  #      MAIL_PORT: 587
+  #      MAIL_USERNAME: ${MAIL_USERNAME}
+  #      MAIL_PASSWORD: ${MAIL_PASSWORD}
+  #    depends_on:
+  #      discovery-service:
+  #        condition: service_healthy
+  #      rabbitmq:
+  #        condition: service_healthy
+  #    networks:
+  #      - insurance-network
 
   auth-service:
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
-    container_name: auth-service
-    hostname: auth-service
-    ports:
-      - "8086:8086"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      HOSTNAME: auth-service
-      AWS_SECRETSMANAGER_ENDPOINT: http://localstack:4566
-      AWS_SECRETSMANAGER_REGION: us-east-1
-      AWS_SECRETSMANAGER_ENABLED: true
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-      keycloak:
-        condition: service_healthy
-    networks:
-      - insurance-network
+      build:
+        context: .
+        dockerfile: auth-service/Dockerfile
+      container_name: auth-service
+      hostname: auth-service
+      ports:
+        - "8086:8086"
+      environment:
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+        HOSTNAME: auth-service
+        AWS_SECRETSMANAGER_ENDPOINT: http://localstack:4566
+        AWS_SECRETSMANAGER_REGION: us-east-1
+        AWS_SECRETSMANAGER_ENABLED: true
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: test
+      depends_on:
+        discovery-service:
+          condition: service_healthy
+        keycloak:
+          condition: service_healthy
+      networks:
+        - insurance-network
 
   member-service:
     build:
@@ -231,54 +231,55 @@ services:
     networks:
       - insurance-network
 
-  policy-service:
-    build:
-      context: .
-      dockerfile: policy-service/Dockerfile
-    container_name: policy-service
-    hostname: policy-service
-    ports:
-      - "8082:8082"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      HOSTNAME: policy-service
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - insurance-network
+  #  policy-service:
+  #    build:
+  #      context: .
+  #      dockerfile: policy-service/Dockerfile
+  #    container_name: policy-service
+  #    hostname: policy-service
+  #    ports:
+  #      - "8082:8082"
+  #    environment:
+  #      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+  #      SPRING_DATASOURCE_USERNAME: admin
+  #      SPRING_DATASOURCE_PASSWORD: admin123
+  #      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+  #      HOSTNAME: policy-service
+  #    depends_on:
+  #      discovery-service:
+  #        condition: service_healthy
+  #      postgres:
+  #        condition: service_healthy
+  #    networks:
+  #      - insurance-network
+  #
+  #  claim-service:
+  #    build:
+  #      context: .
+  #      dockerfile: claim-service/Dockerfile
+  #    container_name: claim-service
+  #    hostname: claim-service
+  #    ports:
+  #      - "8083:8083"
+  #    environment:
+  #      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
+  #      SPRING_DATASOURCE_USERNAME: admin
+  #      SPRING_DATASOURCE_PASSWORD: admin123
+  #      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+  #      HOSTNAME: claim-service
+  #      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+  #      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+  #      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+  #      RABBITMQ_USERNAME: admin
+  #      RABBITMQ_PASSWORD: admin123
+  #    depends_on:
+  #      discovery-service:
+  #        condition: service_healthy
+  #      postgres:
+  #        condition: service_healthy
+  #    networks:
+  #      - insurance-network
 
-  claim-service:
-    build:
-      context: .
-      dockerfile: claim-service/Dockerfile
-    container_name: claim-service
-    hostname: claim-service
-    ports:
-      - "8083:8083"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/insurance_db
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      HOSTNAME: claim-service
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
-      RABBITMQ_USERNAME: admin
-      RABBITMQ_PASSWORD: admin123
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - insurance-network
 
   document-service:
     build:
@@ -300,6 +301,8 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       AWS_S3_ENDPOINT: http://localstack:4566
       AWS_S3_BUCKET_NAME: insurance-documents
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       discovery-service:
         condition: service_healthy
