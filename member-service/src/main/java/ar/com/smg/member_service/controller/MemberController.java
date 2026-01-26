@@ -1,10 +1,9 @@
 package ar.com.smg.member_service.controller;
 
-import ar.com.smg.member_service.entity.Member;
+import ar.com.smg.member_service.model.entity.Member;
 import ar.com.smg.member_service.repository.MemberRepository;
 import arg.com.smg.audit_client.client.AuditClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.dynamodb.model.PutItemResponse;
 

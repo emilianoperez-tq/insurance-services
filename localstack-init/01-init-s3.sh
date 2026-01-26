@@ -70,7 +70,7 @@ awslocal secretsmanager create-secret \
         "server_url": "http://keycloak:8080/realms/insurance-service/protocol/openid-connect/token",
         "realm": "insurance-service",
         "client_id": "insurance-service-microservice",
-        "client_secret": "J71q9dYayYRnrxS7A728Z57dd7YEdSwq",
+        "client_secret": "bcHE6HOVjsFmeyD6Rpeduu9NrBJ6XONl",
         "admin_username": "admin",
         "admin_password": "admin123"
     }'

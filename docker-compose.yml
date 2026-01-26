@@ -223,6 +223,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: admin123
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       HOSTNAME: member-service
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -302,6 +303,7 @@ services:
       AWS_S3_ENDPOINT: http://localstack:4566
       AWS_S3_BUCKET_NAME: insurance-documents
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SPRING_AI_OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       discovery-service:
